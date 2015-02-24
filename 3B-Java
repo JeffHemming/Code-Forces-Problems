@@ -1,0 +1,87 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+
+public class Main {
+
+    public static class boat implements Comparable{
+        public int type;
+        public int capacity;
+        public int number;
+        public int number2;
+        boat(int t, int c, int n){
+            this.type=t;
+            this.capacity=c;
+            this.number=n;
+        }
+        boat(int t, int c, int n, int n2){
+            this.type=t;
+            this.capacity=c;
+            this.number=n;
+            this.number2=n2;
+        }
+        @Override
+        public int compareTo(Object o1) {
+            return Integer.compare(((boat) o1).capacity, this.capacity);
+        }
+    }
+
+    public static void main(String[]args) throws IOException {
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        String[] base=input.readLine().split(" ");
+        int n=Integer.parseInt(base[0]);
+        int v=Integer.parseInt(base[1]);
+        int maxCapacity=0;
+        int used=0;
+        ArrayList<boat> finals=new ArrayList<boat>();
+        //if v is odd, include the biggest 1 volume vehicle
+        //then priority queue all 1 sized vehicles, and set them in groups of 2
+        //then set these groups and all 2 sized vehicles on a pqueue, pull off until
+        //capacity is filled.
+        PriorityQueue<boat> singles=new PriorityQueue();
+        PriorityQueue<boat> all=new PriorityQueue();
+        for(int i=0;i<n;i++){
+            String[] inBoat=input.readLine().split(" ");
+            int t=Integer.parseInt(inBoat[0]);
+            int c=Integer.parseInt(inBoat[1]);
+            boat b=new boat(t,c,i+1);
+            if(b.type==1)singles.add(b);
+            else all.add(b);
+        }
+        if(v==1&&singles.isEmpty()){
+            System.out.println("0");
+        }
+        else{
+            if(v%2!=0&&!singles.isEmpty()){
+                boat a=singles.poll();
+                maxCapacity+=a.capacity;
+                used+=1;
+                finals.add(a);
+            }
+            while (singles.size() > 1) {
+                boat a = singles.poll();
+                boat b = singles.poll();
+                boat c = new boat(3, a.capacity + b.capacity, a.number, b.number);
+                all.add(c);
+            }
+            if (!singles.isEmpty()) {
+                boat a = singles.poll();
+                all.add(a);
+            }
+            while (used <= v-2) {
+                if (all.isEmpty()) break;
+                boat a = all.poll();
+                maxCapacity += a.capacity;
+                used += 2;
+                finals.add(a);
+            }
+
+            System.out.println(maxCapacity);
+            for (int i = 0; i < finals.size(); i++) {
+                if (finals.get(i).type == 3) System.out.print(finals.get(i).number + " " + finals.get(i).number2 + " ");
+                else System.out.print(finals.get(i).number + " ");
+            }
+        }
+    }
+}
